@@ -2,7 +2,7 @@
 var jsdom = require('jsdom');
 
 exports.compile = function(str, opts) {
-	// IDEA : use opts.features, opts.scripts
+	// use opts.features, opts.scripts ?
 	var window = jsdom.jsdom(str, null, {
 		features: {
 			FetchExternalResources: false,				// mandatory !
@@ -15,7 +15,7 @@ exports.compile = function(str, opts) {
 	// core jQuery : selector, manipulation, traversal
 	// use real jQuery when it becomes modular.
 	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
-	var jquip = require('fs').readFileSync("./lib/jquip.js").toString();
+	var jquip = require('fs').readFileSync(require.resolve('jquip-jsdom')).toString();
 	window.run(jquip);
 
 	// remove <script notemplate="server">
