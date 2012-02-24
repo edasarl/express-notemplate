@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "jsdom": "https://github.com/kapouer/jsdom/tarball/notemplate"
-  , "jquip-jsdom": ">=0.3.1-1"
+  , "jquip-jsdom": "https://github.com/kapouer/jquip-jsdom/tarball/master"
   },
   "main": "./notemplate.js"
 }
