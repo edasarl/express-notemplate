@@ -1,0 +1,14 @@
+Version 0.0.3
+=============
+
+* render(view, opts)
+  opts.fragment can be a selector, selected nodes outer html will be
+  outputed instead of the all document.
+
+Version 0.0.2
+=============
+
+* notemplate attribute on script tags can have server,both,client values.
+  Default value is client (not loaded).
+  The notemplate attribute is removed after template is compiled.
+
