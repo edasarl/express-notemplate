@@ -5,6 +5,7 @@ var readfile = require('fs').readFileSync;
 
 exports.compile = function(str, opts) {
 	// use opts.features, opts.scripts ?
+	opts = opts || {};
 	var window = jsdom.jsdom(str, null, {
 		features: {
 			FetchExternalResources: false,				// loaded depending on script[notemplate] attribute
@@ -58,6 +59,8 @@ exports.compile = function(str, opts) {
 		if (!window._merge && !window.merge) return str;
 		if (window._merge) window._merge(data);
 		if (window.merge) window.merge(data);
+		// output selected nodes
+		if (opts.fragment) return outer(window.$(opts.fragment));
 		// outputs doctype because of jsdom bug
 		return window.document.doctype.toString() + "\n" + window.document.outerHTML;
 	};
@@ -65,4 +68,11 @@ exports.compile = function(str, opts) {
 
 function run(window, path) {
 	window.run(readfile(path).toString());
+}
+function outer($nodes) {
+	var ret = '';
+	$nodes.each(function() {
+		ret += this.outerHTML;
+	});
+	return ret;
 }
