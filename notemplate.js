@@ -15,6 +15,7 @@ exports.compile = function(str, opts) {
 		}
 	}).createWindow();
 
+	window.console = console;
 	// core jQuery : selector, manipulation, traversal
 	// use real jQuery when it becomes modular.
 	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
