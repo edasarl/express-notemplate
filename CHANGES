@@ -1,3 +1,8 @@
+Version 0.0.4
+=============
+
+* Ensure window.console is the node console global.
+
 Version 0.0.3
 =============
 
