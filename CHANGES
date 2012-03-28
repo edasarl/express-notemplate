@@ -1,3 +1,15 @@
+Version 0.0.5
+=============
+
+* Use jquery instead of jquip
+  since jquery brings its own sizzle engine, we do not need to patch
+  jsdom's querySelectorAll.
+
+* Instead of having _merge or merge callbacks, functions are triggered
+  by a 'data' event, see README.md.
+  Global handlers of 'data' and 'render' events are possible, making it
+  possible to define middleware.
+
 Version 0.0.4
 =============
 
