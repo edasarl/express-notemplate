@@ -24,7 +24,7 @@ exports.compile = function(str, opts) {
 	// core jQuery : selector, manipulation, traversal
 	// use real jQuery when it becomes modular.
 	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
-	run(window, Path.join(__dirname, 'node_modules/jquery-browser/lib/jquery.js'));
+	run(window, require.resolve('jquery-browser'));
 
 	// <script> tags can have attribute notemplate = server | client | both
 	// default value is client
