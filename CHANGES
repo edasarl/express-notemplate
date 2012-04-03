@@ -7,7 +7,7 @@ Version 0.0.7
 =============
 
 * SECURITY
-	monkey-patch jQuery so it doesn't download nor run script content when
+  monkey-patch jQuery so it doesn't download nor run script content when
   they are inserted into DOM.
 
 Version 0.0.6
