@@ -26,6 +26,15 @@ exports.compile = function(str, opts) {
 	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
 	run(window, require.resolve('jquery-browser'));
 
+	// SECURITY
+	// monkey-patch jQuery so it doesn't download nor run script content when they are inserted into DOM.
+	window.jQuery.buildFragmentOrig = window.jQuery.buildFragment;
+	window.jQuery.buildFragment = function( args, nodes, scripts ) {
+		var r = window.jQuery.buildFragmentOrig( args, nodes, scripts );
+		scripts.length = 0;
+		return r;
+	};
+
 	// <script> tags can have attribute notemplate = server | client | both
 	// default value is client
 	// server value : scripts are fetched (if they have src attribute), and discarded
