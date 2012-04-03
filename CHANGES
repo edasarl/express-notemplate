@@ -1,8 +1,7 @@
 Version 0.0.8
 =============
 
-* Override htmlparser in jsdom so it ignores whitespace.
-  This has the nice effect of having a pretty html output :)
+* Pretty XHTML output (by using jsdom fork).
 
 Version 0.0.7
 =============

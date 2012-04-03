@@ -15,8 +15,7 @@
     }
   ],
   "dependencies": {
-    "node-htmlparser": ">=1.7.5"
-  , "jsdom": ">=0.2.13"
+  , "jsdom": "https://github.com/kapouer/jsdom/tarball/master"
   , "jquery-browser": ">=1.7.2-2"
   },
   "main": "./notemplate.js"
