@@ -3,7 +3,7 @@
   "name": "express-notemplate",
   "description": "Express view engine, merges data into DOM using plain JS",
   "keywords": ["templates", "templating", "unobtrusive", "DOM"],
-  "version": "0.0.7",
+  "version": "0.0.8",
   "repository": {
     "type": "git",
     "url": "git://github.com/kapouer/express-notemplate.git"
@@ -15,7 +15,8 @@
     }
   ],
   "dependencies": {
-    "jsdom": ">=0.2.13"
+    "node-htmlparser": ">=1.7.5"
+  , "jsdom": ">=0.2.13"
   , "jquery-browser": ">=1.7.2-2"
   },
   "main": "./notemplate.js"

@@ -2,6 +2,7 @@ var jsdom = require('jsdom');
 var Path = require('path');
 var URL = require('url');
 var readfile = require('fs').readFileSync;
+var parser = require('htmlparser');
 
 // arrays of handlers
 var handlers = [];
@@ -10,6 +11,14 @@ exports.compile = function(str, opts) {
 	// use opts.features, opts.scripts ?
 	opts = opts || {};
 	opts.public = opts.public || 'public';
+
+	var handler = new parser.DefaultHandler(null, { ignoreWhitespace: true });
+	var parserInstance = new parser.Parser(handler);
+  parser.ParseHtml = function(rawHtml) {
+		parserInstance.includeLocation = false;
+    parserInstance.parseComplete(rawHtml);
+    return handler.dom;
+  };
 	
 	var window = jsdom.jsdom(str, null, {
 		features: {
@@ -17,7 +26,8 @@ exports.compile = function(str, opts) {
 			ProcessExternalResources: false,			// same
 			MutationEvents: false,								// not needed
 			QuerySelector: false									// not needed, we use jquery's bundled sizzle instead of jsdom's one.
-		}
+		},
+		parser: parser
 	}).createWindow();
 
 	window.console = console;
