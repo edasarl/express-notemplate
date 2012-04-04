@@ -1,3 +1,9 @@
+Version 0.0.9
+=============
+
+* Add "output" handler type. Called after dom to html conversion.
+  Allows changing string output.
+
 Version 0.0.8
 =============
 

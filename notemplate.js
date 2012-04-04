@@ -51,17 +51,21 @@ exports.compile = function(str, opts) {
 		if (path) run(window, path);
 	}
 	
-	return function(data) {
+return function(data) {
 		// global handlers
 		triggerHandler('data', window, data, opts);
 		// no handlers return undefined
 		var lastHandlerValue = window.$(window.document).triggerHandler('data', data);
 		// global handlers
 		triggerHandler('render', window, data, opts);
-		// output selected nodes
-		if (opts.fragment) return outer(window.$(opts.fragment));
-		// outputs doctype because of jsdom bug
-		return window.document.doctype.toString() + "\n" + window.document.outerHTML;
+
+		var output;
+		if (opts.fragment) output = outer(window.$(opts.fragment)); // output selected nodes
+		else output = window.document.doctype.toString() + "\n" + window.document.outerHTML; // outputs doctype because of jsdom bug
+		// global handlers
+		var obj = {output:output};
+		triggerHandler('output', obj, data, opts);
+		return obj.output;
 	};
 };
 
