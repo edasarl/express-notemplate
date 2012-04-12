@@ -51,8 +51,10 @@ exports.compile = function(str, opts) {
 		var path = resolve(opts.notemplate.public, src.value);
 		if (path) run(window, path);
 	}
+	var oroot = window.document.documentElement;
 	
 	return function(data) {
+		window.document.replaceChild(oroot.cloneNode(true), window.document.documentElement);
 		// global handlers
 		triggerHandler('data', window, data, opts);
 		// no handlers return undefined
