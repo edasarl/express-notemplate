@@ -63,7 +63,7 @@ exports.compile = function(str, opts) {
 		triggerHandler('render', window, data, opts);
 
 		var output;
-		if (opts.fragment) output = outer(window.$(opts.fragment)); // output selected nodes
+		if (data.fragment) output = outer(window.$(data.fragment)); // output selected nodes
 		else output = window.document.doctype.toString() + "\n" + window.document.outerHTML; // outputs doctype because of jsdom bug
 		// global handlers
 		var obj = {output:output};

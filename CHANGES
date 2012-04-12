@@ -1,3 +1,8 @@
+Version 0.0.12
+==============
+
+* Fix: fragment is in data, not in compile options. Production.
+
 Version 0.0.11
 ==============
 
