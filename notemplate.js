@@ -51,7 +51,7 @@ exports.compile = function(str, opts) {
 		if (path) run(window, path);
 	}
 	
-return function(data) {
+	return function(data) {
 		// global handlers
 		triggerHandler('data', window, data, opts);
 		// no handlers return undefined
