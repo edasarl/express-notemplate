@@ -9,7 +9,8 @@ var handlers = [];
 exports.compile = function(str, opts) {
 	// use opts.features, opts.scripts ?
 	opts = opts || {};
-	opts.public = opts.public || 'public';
+	opts.notemplate = opts.notemplate || {};
+	opts.notemplate.public = opts.notemplate.public || 'public';
 	
 	var window = jsdom.jsdom(str, null, {
 		features: {
@@ -47,7 +48,7 @@ exports.compile = function(str, opts) {
 		if (att == "server") window.$(script).remove(); // remove script tag
 		if (!src) continue;
 		// load file and run it
-		var path = resolve(opts.public, src.value);
+		var path = resolve(opts.notemplate.public, src.value);
 		if (path) run(window, path);
 	}
 	
