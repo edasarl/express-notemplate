@@ -83,6 +83,11 @@ Middleware
 	notemplate.on('render', function(window, data, opts) {
 		// this is called *after* any other template-bound handlers
 	});
+	notemplate.on('output', function(ref) {
+		// this is called *after* the DOM has been serialized to html
+		// ref.output is a string and can be modified.
+		ref.output = ref.output.replace('é', '&eacute;');
+	});
 
 	Typical example of this are the notemplate-rootpath and notemplate-minify middlewares.
 
