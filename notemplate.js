@@ -120,7 +120,7 @@ function jQueryPatches($) {
 	$.buildFragment = function(args, nodes, scripts) {
 		var r = $.buildFragmentOrig(args, nodes, scripts);
 		// or else script.contentText will be run, this is a security risk
-		scripts.length = 0;
+		if (Array.isArray(scripts)) scripts.length = 0;
 		return r;
 	};
 }
