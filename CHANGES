@@ -1,3 +1,9 @@
+Version 0.0.13
+==============
+
+* Fix: buildFragment override has a bug.
+* Document 'output' event.
+
 Version 0.0.12
 ==============
 
