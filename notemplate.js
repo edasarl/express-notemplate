@@ -26,7 +26,7 @@ exports.compile = function(str, opts) {
 	// core jQuery : selector, manipulation, traversal
 	// use real jQuery when it becomes modular.
 	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
-	run(window, require.resolve('jquery-browser'));
+	run(window, Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js'));
 
 	jQueryPatches(window.jQuery);
 
