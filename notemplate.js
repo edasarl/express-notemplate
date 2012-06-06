@@ -11,7 +11,7 @@ var notemplate = module.exports = new EventEmitter();
 var views = Object.create(null);
 
 // keep that in memory
-var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js'));
+var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js')).toString();
 
 
 function load(path, cb) {
@@ -122,7 +122,7 @@ notemplate.__express = function(filename, options, callback) {
 				loadScript(src.value, function(err, textContent) {
 					if (err) done(err);
 					else {
-						window.run(textContent);
+						window.run(textContent.toString());
 						done();
 					}
 				});
