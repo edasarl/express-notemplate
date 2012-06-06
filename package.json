@@ -17,7 +17,8 @@
   "dependencies": {
     "express": "3.0.x"
   , "jsdom": "https://github.com/kapouer/jsdom/tarball/master"
-  , "jquery-browser": ">=1.7.2-2"
+  , "jquery-browser": "1.7.x"
+  , "async": "0.1.x"
   },
   "main": "./notemplate.js"
 }
