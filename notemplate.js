@@ -56,7 +56,7 @@ function loadScript(root, src, cb) {
 	var path = Path.join(root, url.pathname);
 	Path.exists(path, function(exists) {
 		if (exists) fs.readFile(path, cb);
-		else cb(format("express-notemplate error - cannot load local script\n%s", path));
+		else cb(format("express-notemplate error - cannot find local script\n%s", path));
 	});
 }
 
