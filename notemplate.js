@@ -1,18 +1,42 @@
 var jsdom = require('jsdom');
 var Path = require('path');
 var URL = require('url');
-var readfile = require('fs').readFileSync;
+var EventEmitter = require('events').EventEmitter;
+var fs = require('fs');
+var async = require('async');
+var format = require('util').format;
 
-// arrays of handlers
-var handlers = [];
+var notemplate = module.exports = {};
+notemplate.prototype = Object.create(EventEmitter.prototype);
 
-exports.compile = function(str, opts) {
-	// use opts.features, opts.scripts ?
-	opts = opts || {};
-	opts.notemplate = opts.notemplate || {};
-	opts.notemplate.public = opts.notemplate.public || 'public';
-	
-	var window = jsdom.jsdom(str, null, {
+var views = Object.create(null);
+
+// keep that in memory
+var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js'));
+
+
+function load(path, cb) {
+	var view = views[path] || { path: path };
+	fs.stat(path, function(err, result) {
+		if (err) return cb(err);
+		if (view.mtime && result.mtime <= view.mtime) {
+			view.hit = true;
+			return cb(null, view);
+		}
+		fs.readFile(view.path, function(err, str) {
+			if (err) return cb(err, view);
+			view.window = getWindow(str);
+			view.mtime = result.mtime;
+			view.hit = false;
+			views[view.path] = view;
+			return cb(null, view);
+		});		
+	});
+}
+
+function getWindow(str) {
+	// create window with jquery
+	var window = jsdom.jsdom(str, null, {			// default DOM, but eventually will be level2.html
 		features: {
 			FetchExternalResources: false,				// loaded depending on script[notemplate] attribute
 			ProcessExternalResources: false,			// same
@@ -21,89 +45,20 @@ exports.compile = function(str, opts) {
 		},
 		xhtml: true
 	}).createWindow();
-
 	window.console = console;
-	// core jQuery : selector, manipulation, traversal
-	// use real jQuery when it becomes modular.
-	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
-	run(window, Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js'));
-
-	jQueryPatches(window.jQuery);
-
-	// <script> tags can have attribute notemplate = server | client | both
-	// default value is client
-	// server value : scripts are fetched (if they have src attribute), and discarded
-	// client value : script are not fetched
-	// both : scripts are fetched (if they have src attribute )and not discarded
-	var scripts = window.$('script');
-	for (var i=0, len = scripts.length; i < len; i++) {
-		var script = scripts[i];
-		var att = script.attributes.notemplate;
-		if (!att) continue; // default is notemplate="client"
-		att = att.value;
-		script.attributes.removeNamedItem('notemplate'); // make sure attribute is removed
-		if (att != "server" && att != "both") continue; // any other value is "client"
-		var src = script.attributes.src;
-		if (!src && script.textContent) window.run(script.textContent); // html5 runs script content only when src is not set
-		if (att == "server") window.$(script).remove(); // remove script tag
-		if (!src) continue;
-		// load file and run it
-		var path = resolve(opts.notemplate.public, src.value);
-		if (path) run(window, path);
-	}
-	var oroot = window.document.documentElement;
-	
-	return function(data) {
-		window.document.replaceChild(oroot.cloneNode(true), window.document.documentElement);
-		// global handlers
-		triggerHandler('data', window, data, opts);
-		// no handlers return undefined
-		var lastHandlerValue = window.$(window.document).triggerHandler('data', data);
-		// global handlers
-		triggerHandler('render', window, data, opts);
-
-		var output;
-		if (data.fragment) output = outer(window.$(data.fragment)); // output selected nodes
-		else output = window.document.doctype.toString() + "\n" + window.document.outerHTML; // outputs doctype because of jsdom bug
-		// global handlers
-		var obj = {output:output};
-		triggerHandler('output', obj, data, opts);
-		return obj.output;
-	};
-};
-
-exports.on = function(type, handler) {
-	// allows adding "middleware" before compile() is called by render()
-	// event can be 'data' in which case the handler is called before other handlers, or 'render',
-	// in which case the handler is called after all other handlers, that is, before html output
-	handlers.forEach(function(o) {
-		if (o.type == type && o.handler == handler) return; // register handlers only once
-	});
-	handlers.push({type:type, handler:handler});
-};
-
-function triggerHandler(type, window, data, opts) {
-	handlers.forEach(function(o) {
-		if (o.type == type) o.handler(window, data, opts);
-	});
+	window.run(jquery);
+	jqueryPatches(window.jQuery);
+	return window;
 }
 
-function run(window, path) {
-	window.run(readfile(path).toString());
-}
-
-function resolve(public, src) {
+function loadScript(src, cb) {
 	var url = URL.parse(src);
-	if (url.hostname) {
-		console.error("express-notemplate doesn't allow loading external URL -- ping author to do it", script);
-		return null;
-	}
-	var path = Path.join('.', public, url.pathname);
-	if (!Path.existsSync(path)) {
-		console.error("express-notemplate doesn't find script.src file", path);
-		return null;
-	}
-	return path;
+	if (url.hostname) return cb(format("express-notemplate error - cannot load remote script\n%s", src), null);
+	var path = Path.join(notemplate.settings.public, url.pathname);
+	path.exists(path, function(exists) {
+		if (exists) fs.readFile(path, cb);
+		else cb(format("express-notemplate error - cannot load local script\n%s", path));
+	});
 }
 
 function outer($nodes) {
@@ -114,7 +69,7 @@ function outer($nodes) {
 	return ret;
 }
 
-function jQueryPatches($) {
+function jqueryPatches($) {
 	// jQuery monkey-patch
 	$.buildFragmentOrig = $.buildFragment;
 	$.buildFragment = function(args, nodes, scripts) {
@@ -124,3 +79,62 @@ function jQueryPatches($) {
 		return r;
 	};
 }
+
+function merge(view, options, callback) {
+	var window = view.window;
+	var $ = window.$;
+	var document = window.document;
+	document.replaceChild(view.root.cloneNode(true), document.documentElement);
+	// global listeners
+	notemplate.emit('data', view, options);
+	// listeners from scripts loaded inside view.window
+	$(document).triggerHandler('data', data);
+	// global listeners
+	notemplate.emit('render', view, options);
+	var output;
+	if (options.fragment) output = outer($(options.fragment)); // output selected nodes
+	else output = document.doctype.toString() + "\n" + document.outerHTML; // outputs doctype because of jsdom bug
+	// global listeners can modify output (sync)
+	var obj = { output : output };
+	notemplate.emit('output', obj, options);
+	callback(null, obj.output);
+}
+
+notemplate.__express = function(filename, options, callback) {
+	load(filename, function(err, view) {
+		if (err) return callback(err);
+		// the first time the DOM is ready is an event
+		var window = view.window;
+		if (!view.hit) {
+			notemplate.emit('ready', view, options);
+			async.forEach(window.$('script'), function(script, done) {
+				var att = script.attributes.notemplate;
+				// default is notemplate="client"
+				if (!att) return done();
+				att = att.value;
+				script.attributes.removeNamedItem('notemplate');
+				// any other value is "client"
+				if (att != "server" && att != "both") return done();
+				var src = script.attributes.src;
+				// html5 runs script content only when src is not set
+				if (!src && script.textContent) window.run(script.textContent);
+				if (att == "server") script.parentNode.remove
+				if (!src) return done();
+				loadScript(src.value, function(err, textContent) {
+					if (err) done(err);
+					else {
+						window.run(textContent);
+						done();
+					}
+				});
+			}, function(err) {
+				if (err) console.error(err); // errors are not fatal
+				view.hit = true;
+				view.root = window.document.documentElement;
+				// all scripts have been loaded
+				// now we can deal with data merging
+				merge(view, options, callback);
+			});
+		} else merge(view, options, callback);
+	});
+};
