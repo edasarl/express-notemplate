@@ -6,8 +6,7 @@ var fs = require('fs');
 var async = require('async');
 var format = require('util').format;
 
-var notemplate = module.exports = {};
-notemplate.prototype = Object.create(EventEmitter.prototype);
+var notemplate = module.exports = new EventEmitter();
 
 var views = Object.create(null);
 
