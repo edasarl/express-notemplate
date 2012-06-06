@@ -106,7 +106,7 @@ notemplate.__express = function(filename, options, callback) {
 		var window = view.window;
 		if (!view.hit) {
 			notemplate.emit('ready', view, options);
-			async.forEach(window.$('script'), function(script, done) {
+			async.forEachSeries(window.$('script'), function(script, done) {
 				var att = script.attributes.notemplate;
 				// default is notemplate="client"
 				if (!att) return done();
