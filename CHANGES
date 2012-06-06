@@ -1,3 +1,15 @@
+Version 0.1.1
+=============
+
+* Designed for express 3, not compatible with express 2.
+* Fully asynchronous.
+* Listeners signatures changed to (view, opts) where
+  view.window is the current DOM window, and opts is the argument
+  given by express 3 to templates.
+* Global events: ready, data, render, output
+* Settings :
+  + app.settings.statics, default value process.cwd() + '/public'
+
 Version 0.0.13
 ==============
 
