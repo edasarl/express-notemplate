@@ -54,7 +54,7 @@ function loadScript(src, cb) {
 	var url = URL.parse(src);
 	if (url.hostname) return cb(format("express-notemplate error - cannot load remote script\n%s", src), null);
 	var path = Path.join(notemplate.settings.public, url.pathname);
-	path.exists(path, function(exists) {
+	Path.exists(path, function(exists) {
 		if (exists) fs.readFile(path, cb);
 		else cb(format("express-notemplate error - cannot load local script\n%s", path));
 	});
@@ -87,7 +87,7 @@ function merge(view, options, callback) {
 	// global listeners
 	notemplate.emit('data', view, options);
 	// listeners from scripts loaded inside view.window
-	$(document).triggerHandler('data', data);
+	$(document).triggerHandler('data', options);
 	// global listeners
 	notemplate.emit('render', view, options);
 	var output;
