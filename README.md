@@ -18,17 +18,15 @@ The only extra is a jQuery $ object provided by default on server.
 (if the javascript code is not used on clients, jQuery is not needed on clients).
 
 
-Setup
------
+Express 3 Setup
+---------------
 
-	app.configure(function(){
-		app.set('views', __dirname + '/views');
-		app.register('.html', require('express-notemplate'));
-		app.set('view engine', 'html');
-		app.set('view options', {
-			layout: false
-		});
-	});
+	var notemplate = require('express-notemplate');
+	app.set('statics', process.cwd() + '/public');
+	app.set('views', process.cwd() + '/views');
+	app.engine('html', notemplate.__express);
+	app.set('view engine', 'html');
+	app.use(express.static(app.get('statics')));
 
 
 Usage
@@ -36,7 +34,7 @@ Usage
 
 It is meant to be used as any other express view rendering :
 
-	res.local('mydata', mydata);
+	res.locals.mydata = mydata;
 	res.render('index');
 
 Then express-notemplate will load the html file into a DOM, add window.$ to it, and process script tags :
@@ -75,25 +73,42 @@ The "notemplate" attribute is removed from html output.
 Middleware
 ----------
 
+Aside from page-bound scripts for merging data, there are several 'global'
+events that can be listened to :
+
+	* ready		page DOM loaded in view.window - jquery available.
+		Listener arguments : view, opts
+	* data		called before any page-bound handlers, all page-bound scripts being loaded
+		Listener arguments : view, opts
+	* render	called after page-bound handlers
+		Listener arguments : view, opts
+	* output	called after DOM is serialized to xhtml string
+		Listener argument : { output : <str> }, opts
+
+
+Usage :
+
+	view.window
+	view.window.$
+	view.window.document
+	view.window.console
+
+	opts.settings.env
+	opts.locals.mydata
+	opts.mydata
+	opts.use(...)
+		
+
 	var notemplate = require('express-notemplate');
-	notemplate.on('data', function(window, data, opts) {
-		// opts are the options of compile(str, opts)
-		// this is called *before* any other template-bound handlers
-	});
-	notemplate.on('render', function(window, data, opts) {
-		// this is called *after* any other template-bound handlers
-	});
+	../..
 	notemplate.on('output', function(ref) {
-		// this is called *after* the DOM has been serialized to html
-		// ref.output is a string and can be modified.
 		ref.output = ref.output.replace('é', '&eacute;');
 	});
 
-	Typical example of this are the notemplate-rootpath and notemplate-minify middlewares.
+A typical use of middleware is in notemplate-minify.
 
 
 Features
 --------
 
 * console.log works in the jsdom context.
-* globally defined event handlers for all templates :
