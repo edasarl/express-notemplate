@@ -50,10 +50,10 @@ function getWindow(str) {
 	return window;
 }
 
-function loadScript(src, cb) {
+function loadScript(root, src, cb) {
 	var url = URL.parse(src);
 	if (url.hostname) return cb(format("express-notemplate error - cannot load remote script\n%s", src), null);
-	var path = Path.join(notemplate.settings.public, url.pathname);
+	var path = Path.join(root, url.pathname);
 	Path.exists(path, function(exists) {
 		if (exists) fs.readFile(path, cb);
 		else cb(format("express-notemplate error - cannot load local script\n%s", path));
@@ -119,7 +119,7 @@ notemplate.__express = function(filename, options, callback) {
 				if (!src && script.textContent) window.run(script.textContent);
 				if (att == "server") script.parentNode.remove
 				if (!src) return done();
-				loadScript(src.value, function(err, textContent) {
+				loadScript(options.settings.statics || process.cwd() + '/public', src.value, function(err, textContent) {
 					if (err) done(err);
 					else {
 						window.run(textContent.toString());
