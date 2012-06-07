@@ -76,7 +76,7 @@ Middleware
 Aside from page-bound scripts for merging data, there are several 'global'
 events that can be listened to :
 
-	* ready		page DOM loaded in view.window - jquery available.
+	* ready		page DOM loaded in view.window - jquery and other scripts are available, as usual
 		Listener arguments : view, opts
 	* data		called before any page-bound handlers, all page-bound scripts being loaded
 		Listener arguments : view, opts

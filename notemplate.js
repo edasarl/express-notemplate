@@ -105,7 +105,6 @@ notemplate.__express = function(filename, options, callback) {
 		// the first time the DOM is ready is an event
 		var window = view.window;
 		if (!view.hit) {
-			notemplate.emit('ready', view, options);
 			async.forEachSeries(window.$('script'), function(script, done) {
 				var att = script.attributes.notemplate;
 				// default is notemplate="client"
@@ -128,6 +127,7 @@ notemplate.__express = function(filename, options, callback) {
 				});
 			}, function(err) {
 				if (err) console.error(err); // errors are not fatal
+				notemplate.emit('ready', view, options);
 				view.hit = true;
 				view.root = window.document.documentElement;
 				// all scripts have been loaded

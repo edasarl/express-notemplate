@@ -1,3 +1,9 @@
+Version 0.1.2
+=============
+
+* Global ready event is called after all scripts have been loaded,
+  this mimics browser behavior (and is more useful).
+
 Version 0.1.1
 =============
 
