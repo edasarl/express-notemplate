@@ -1,3 +1,13 @@
+Version 0.0.15
+==============
+
+* Fix: $(document).ready must be triggered before $(document).on('data')
+
+Version 0.0.14
+==============
+
+* Update to jquery-browser 1.7.2-3
+
 Version 0.0.13
 ==============
 
