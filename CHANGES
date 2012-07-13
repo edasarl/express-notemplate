@@ -1,3 +1,8 @@
+Version 0.1.3
+=============
+
+* Ensure jQuery ready event is called before data event.
+
 Version 0.1.2
 =============
 
