@@ -45,7 +45,10 @@ function getWindow(str) {
 		xhtml: true
 	}).createWindow();
 	window.console = console;
+	var tempfun = window.setTimeout;
+	window.setTimeout = function(fun, tt) { fun(); };
 	window.run(jquery);
+	window.setTimeout = tempfun;
 	jqueryPatches(window.jQuery);
 	return window;
 }
