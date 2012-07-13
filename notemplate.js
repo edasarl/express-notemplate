@@ -26,7 +26,15 @@ exports.compile = function(str, opts) {
 	// core jQuery : selector, manipulation, traversal
 	// use real jQuery when it becomes modular.
 	// jquip needs some patches to run inside jsdom (mainly because node.style.key is not supported by cssom)
+	
+	// jQuery uses setTimeout wrongly with $(document).ready()
+	var tempfun = window.setTimeout;
+	window.setTimeout = function(fun, tt) {
+		fun();
+	};
 	run(window, Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js'));
+	// restore setTimeout
+	window.setTimeout = tempfun;
 
 	jQueryPatches(window.jQuery);
 
@@ -57,6 +65,7 @@ exports.compile = function(str, opts) {
 		window.document.replaceChild(oroot.cloneNode(true), window.document.documentElement);
 		// global handlers
 		triggerHandler('data', window, data, opts);
+		window.$(window.document).triggerHandler('ready');
 		// no handlers return undefined
 		var lastHandlerValue = window.$(window.document).triggerHandler('data', data);
 		// global handlers
