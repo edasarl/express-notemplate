@@ -3,7 +3,7 @@ var Path = require('path');
 var URL = require('url');
 var EventEmitter = require('events').EventEmitter;
 var fs = require('fs');
-var async = require('async');
+var Step = require('step');
 var format = require('util').format;
 
 var notemplate = module.exports = new EventEmitter();
@@ -108,25 +108,29 @@ notemplate.__express = function(filename, options, callback) {
 		// the first time the DOM is ready is an event
 		var window = view.window;
 		if (!view.hit) {
-			async.forEachSeries(window.$('script'), function(script, done) {
-				var att = script.attributes.notemplate;
-				// default is notemplate="client"
-				if (!att) return done();
-				att = att.value;
-				script.attributes.removeNamedItem('notemplate');
-				// any other value is "client"
-				if (att != "server" && att != "both") return done();
-				var src = script.attributes.src;
-				// html5 runs script content only when src is not set
-				if (!src && script.textContent) window.run(script.textContent);
-				if (att == "server") script.parentNode.remove
-				if (!src) return done();
-				loadScript(options.settings.statics || process.cwd() + '/public', src.value, function(err, textContent) {
-					if (err) done(err);
-					else {
-						window.run(textContent.toString());
-						done();
-					}
+			Step(function() {
+				var group = this.group();
+				window.$('script').forEach(function(script) {
+					var done = group();
+					var att = script.attributes.notemplate;
+					// default is notemplate="client"
+					if (!att) return done();
+					att = att.value;
+					script.attributes.removeNamedItem('notemplate');
+					// any other value is "client"
+					if (att != "server" && att != "both") return done();
+					var src = script.attributes.src;
+					// html5 runs script content only when src is not set
+					if (!src && script.textContent) window.run(script.textContent);
+					if (att == "server") script.parentNode.remove
+					if (!src) return done();
+					loadScript(options.settings.statics || process.cwd() + '/public', src.value, function(err, textContent) {
+						if (err) done(err);
+						else {
+							window.run(textContent.toString());
+							done();
+						}
+					});
 				});
 			}, function(err) {
 				if (err) console.error(err); // errors are not fatal
