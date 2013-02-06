@@ -110,7 +110,8 @@ notemplate.__express = function(filename, options, callback) {
 		if (!view.hit) {
 			Step(function() {
 				var group = this.group();
-				window.$('script').forEach(function(script) {
+				window.$('script').each(function() {
+					var script = this;
 					var done = group();
 					var att = script.attributes.notemplate;
 					// default is notemplate="client"
