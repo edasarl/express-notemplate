@@ -1,3 +1,10 @@
+Version 0.1.4
+=============
+
+* Use original jsdom 0.4.x.
+* Use jquery 1.9.x.
+* Use Step instead of Async.
+
 Version 0.1.3
 =============
 
