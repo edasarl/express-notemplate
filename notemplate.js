@@ -125,16 +125,13 @@ notemplate.__express = function(filename, options, callback) {
 					if (!src && script.textContent) window.run(script.textContent);
 					if (att == "server") script.parentNode.remove
 					if (!src) return done();
-					loadScript(options.settings.statics || process.cwd() + '/public', src.value, function(err, textContent) {
-						if (err) done(err);
-						else {
-							window.run(textContent.toString());
-							done();
-						}
-					});
+					loadScript(options.settings.statics || process.cwd() + '/public', src.value, done);
 				});
-			}, function(err) {
+			}, function(err, scripts) {
 				if (err) console.error(err); // errors are not fatal
+				scripts.forEach(function(txt) {
+					if (txt) window.run(txt.toString());
+				});
 				notemplate.emit('ready', view, options);
 				view.hit = true;
 				view.root = window.document.documentElement;
