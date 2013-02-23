@@ -48,7 +48,7 @@ function getWindow(str) {
 	window.setTimeout = function(fun, tt) { fun(); };
 	window.run(jquery);
 	window.setTimeout = tempfun;
-	jqueryPatches(window.jQuery);
+	window.jQuery.ajax = window.jQuery.globalEval = function() {};
 	return window;
 }
 
@@ -68,17 +68,6 @@ function outer($nodes) {
 		ret += this.outerHTML;
 	});
 	return ret;
-}
-
-function jqueryPatches($) {
-	// jQuery monkey-patch
-	$.buildFragmentOrig = $.buildFragment;
-	$.buildFragment = function(args, nodes, scripts) {
-		var r = $.buildFragmentOrig(args, nodes, scripts);
-		// or else script.contentText will be run, this is a security risk
-		if (Array.isArray(scripts)) scripts.length = 0;
-		return r;
-	};
 }
 
 function merge(view, options, callback) {
