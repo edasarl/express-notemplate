@@ -6,6 +6,13 @@ var fs = require('fs');
 var Step = require('step');
 var format = require('util').format;
 
+jsdom.defaultDocumentFeatures = {
+	FetchExternalResources: false,				// loaded depending on script[notemplate] attribute
+	ProcessExternalResources: false,			// same
+	MutationEvents: false,								// not needed
+	QuerySelector: false									// not needed, we use jquery's bundled sizzle instead of jsdom's one.
+};
+
 var notemplate = module.exports = new EventEmitter();
 
 var views = Object.create(null);
@@ -35,15 +42,7 @@ function load(path, cb) {
 
 function getWindow(str) {
 	// create window with jquery
-	var window = jsdom.jsdom(str, null, {			// default DOM, but eventually will be level2.html
-		features: {
-			FetchExternalResources: false,				// loaded depending on script[notemplate] attribute
-			ProcessExternalResources: false,			// same
-			MutationEvents: false,								// not needed
-			QuerySelector: false									// not needed, we use jquery's bundled sizzle instead of jsdom's one.
-		},
-		xhtml: true
-	}).createWindow();
+	var window = jsdom.jsdom(str, "2").createWindow();
 	window.console = console;
 	var tempfun = window.setTimeout;
 	window.setTimeout = function(fun, tt) { fun(); };
