@@ -1,3 +1,12 @@
+Version 0.1.7
+=============
+
+* Bugfix disable completely jQuery.ajax and jQuery.globalEval,
+  instead of buildFragment monkey patch that does work with jQuery 1.9.
+* Depend on jsdom 0.5.x
+* Refactor defaults options for jsdom window creation.
+* Only one newline after doctype.
+
 Version 0.1.6
 =============
 
