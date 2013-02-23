@@ -83,7 +83,12 @@ function merge(view, options, callback) {
 	notemplate.emit('render', view, options);
 	var output;
 	if (options.fragment) output = outer($(options.fragment)); // output selected nodes
-	else output = document.doctype.toString() + "\n" + document.outerHTML; // outputs doctype because of jsdom bug
+	else {
+		output = document.outerHTML;
+		var docstr = document.doctype.toString();
+		if (output.length && output[0] != "\n") docstr += "\n";
+		output = docstr + output; // outputs doctype because of jsdom bug
+	}
 	// global listeners can modify output (sync)
 	var obj = { output : output };
 	notemplate.emit('output', obj, options);
