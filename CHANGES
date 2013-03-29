@@ -1,3 +1,13 @@
+Version 0.1.8
+=============
+
+* Use html5 parser instead of node-htmlparser, because it correctly
+  handles brackets in attributes values.
+  Will probably switch to node-htmlparser2 or switch back to the default
+  jsdom parser when this is fixed, see
+  https://github.com/tautologistics/node-htmlparser/issues/2
+  https://github.com/fb55/node-htmlparser/issues/14
+
 Version 0.1.7
 =============
 
