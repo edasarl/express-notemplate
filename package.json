@@ -8,12 +8,7 @@
     "type": "git",
     "url": "git://github.com/kapouer/express-notemplate.git"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://www.opensource.org/licenses/mit-license.php"
-    }
-  ],
+  "license": "MIT",
   "dependencies": {
     "express": "3.0.x"
   , "jsdom": "0.5.x"
