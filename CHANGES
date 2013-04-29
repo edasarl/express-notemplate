@@ -1,3 +1,12 @@
+Version 0.1.9
+=============
+
+* Use jquery 2.0.x - update jquery fix.
+* Use jsdom 0.6.x - set page url to / by default.
+* Small compatibility fix for nodejs 0.10
+* Use html5 parser if it is available, otherwise use jsdom default parser.
+* Relax express version
+
 Version 0.1.8
 =============
 
