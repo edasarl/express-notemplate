@@ -6,6 +6,7 @@ var fs = require('fs');
 var Step = require('step');
 var format = require('util').format;
 var Parser = require('html5');
+var fexists = fs.exists || Path.exists;
 
 jsdom.defaultDocumentFeatures = {
 	FetchExternalResources: false,				// loaded depending on script[notemplate] attribute
@@ -57,7 +58,7 @@ function loadScript(root, src, cb) {
 	var url = URL.parse(src);
 	if (url.hostname) return cb(format("express-notemplate error - cannot load remote script\n%s", src), null);
 	var path = Path.join(root, url.pathname);
-	Path.exists(path, function(exists) {
+	fexists(path, function(exists) {
 		if (exists) fs.readFile(path, cb);
 		else cb(format("express-notemplate error - cannot find local script\n%s", path));
 	});
