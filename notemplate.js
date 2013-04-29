@@ -48,6 +48,7 @@ function load(path, cb) {
 function getWindow(str) {
 	// create window with jquery
 	var opts = {
+		url: "/" // do not resolve to this file path !
 	};
 	if (Parser) opts.parser = Parser;
 	var window = jsdom.jsdom(str, "2", opts).createWindow();
