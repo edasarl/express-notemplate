@@ -57,7 +57,7 @@ function getWindow(str) {
 	window.setTimeout = function(fun, tt) { fun(); };
 	window.run(jquery);
 	window.setTimeout = tempfun;
-	window.jQuery.ajax = window.jQuery.globalEval = function() {};
+	window.jQuery._evalUrl = window.jQuery.globalEval = function() {};
 	return window;
 }
 
