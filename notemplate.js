@@ -5,8 +5,11 @@ var EventEmitter = require('events').EventEmitter;
 var fs = require('fs');
 var Step = require('step');
 var format = require('util').format;
-var Parser = require('html5');
 var fexists = fs.exists || Path.exists;
+var Parser;
+try {
+	Parser = require('html5');
+} catch (e) {}
 
 jsdom.defaultDocumentFeatures = {
 	FetchExternalResources: false,				// loaded depending on script[notemplate] attribute
@@ -44,7 +47,10 @@ function load(path, cb) {
 
 function getWindow(str) {
 	// create window with jquery
-	var window = jsdom.jsdom(str, "2", {parser: Parser}).createWindow();
+	var opts = {
+	};
+	if (Parser) opts.parser = Parser;
+	var window = jsdom.jsdom(str, "2", opts).createWindow();
 	window.console = console;
 	var tempfun = window.setTimeout;
 	window.setTimeout = function(fun, tt) { fun(); };
@@ -83,7 +89,17 @@ function merge(view, options, callback) {
 	$(document).triggerHandler('data', options);
 	// global listeners
 	notemplate.emit('render', view, options);
-	var output = options.fragment ? outer($(options.fragment)) : document.outerHTML;
+	var output;
+	if (options.fragment) output = outer($(options.fragment)); // output selected nodes
+	else {
+		output = document.outerHTML;
+		if (output.length < 2 || output.substr(0, 2) != "<!") {
+			// add <!DOCTYPE... when missing (problem with parser)
+			var docstr = document.doctype.toString();
+			if (output.length && output[0] != "\n") docstr += "\n";
+			output = docstr + output;
+		}
+	}
 	// global listeners can modify output (sync)
 	var obj = { output : output };
 	notemplate.emit('output', obj, options);
