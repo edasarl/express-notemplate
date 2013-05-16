@@ -76,14 +76,18 @@ Middleware
 Aside from page-bound scripts for merging data, there are several 'global'
 events that can be listened to :
 
-	* ready		page DOM loaded in view.window - jquery and other scripts are available, as usual
-		Listener arguments : view, opts
-	* data		called before any page-bound handlers, all page-bound scripts being loaded
-		Listener arguments : view, opts
-	* render	called after page-bound handlers
-		Listener arguments : view, opts
-	* output	called after DOM is serialized to xhtml string
-		Listener argument : { output : <str> }, opts
+* ready
+	page DOM loaded in view.window - jquery and other scripts are available, as usual  
+	Listener arguments : view, opts
+* data
+  called before any page-bound handlers, all page-bound scripts being loaded  
+	Listener arguments : view, opts  
+* render
+	called after page-bound handlers  
+	Listener arguments : view, opts
+* output
+	called after DOM is serialized to xhtml string  
+	Listener argument : { output : <str> }, opts
 
 
 Usage :
