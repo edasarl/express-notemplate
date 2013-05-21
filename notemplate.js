@@ -128,7 +128,7 @@ notemplate.__express = function(filename, options, callback) {
 					var src = script.attributes.src;
 					// html5 runs script content only when src is not set
 					if (!src && script.textContent) window.run(script.textContent);
-					if (att == "server") script.parentNode.remove
+					if (att == "server") script.parentNode.removeChild(script);
 					if (!src) return done();
 					loadScript(options.settings.statics || process.cwd() + '/public', src.value, done);
 				});
