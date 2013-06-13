@@ -26,7 +26,7 @@ var views = Object.create(null);
 var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js')).toString();
 
 
-function load(path, cb) {
+function load(path, href, cb) {
 	var view = views[path] || { path: path };
 	fs.stat(path, function(err, result) {
 		if (err) return cb(err);
@@ -36,7 +36,7 @@ function load(path, cb) {
 		}
 		fs.readFile(view.path, function(err, str) {
 			if (err) return cb(err, view);
-			view.window = getWindow(str);
+			view.window = getWindow(str, href);
 			view.mtime = result.mtime;
 			view.hit = false;
 			views[view.path] = view;
@@ -45,10 +45,10 @@ function load(path, cb) {
 	});
 }
 
-function getWindow(str) {
+function getWindow(str, href) {
 	// create window with jquery
 	var opts = {
-		url: "/" // do not resolve to this file path !
+		url: href || "/" // do not resolve to this file path !
 	};
 	if (Parser) opts.parser = Parser;
 	var window = jsdom.jsdom(str, "2", opts).createWindow();
@@ -108,7 +108,7 @@ function merge(view, options, callback) {
 }
 
 notemplate.__express = function(filename, options, callback) {
-	load(filename, function(err, view) {
+	load(filename, options.settings.href, function(err, view) {
 		if (err) return callback(err);
 		// the first time the DOM is ready is an event
 		var window = view.window;
@@ -147,3 +147,9 @@ notemplate.__express = function(filename, options, callback) {
 		} else merge(view, options, callback);
 	});
 };
+
+notemplate.middleware = function(req, res, next) {
+	req.app.settings.href = req.protocol + '://' + req.headers.host + req.url;
+	next();
+};
+
