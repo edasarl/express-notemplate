@@ -1,3 +1,8 @@
+Version 0.1.12
+==============
+
+* window.navigator.server is true when run in notemplate.
+
 Version 0.1.11
 ==============
 
