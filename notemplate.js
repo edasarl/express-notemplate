@@ -52,6 +52,7 @@ function getWindow(str, href) {
 	};
 	if (Parser) opts.parser = Parser;
 	var window = jsdom.jsdom(str, "2", opts).createWindow();
+	window.navigator.server = true;
 	window.console = console;
 	var tempfun = window.setTimeout;
 	window.setTimeout = function(fun, tt) { fun(); };
