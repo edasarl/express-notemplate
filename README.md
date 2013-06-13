@@ -27,7 +27,7 @@ Express 3 Setup
 	app.engine('html', notemplate.__express);
 	app.set('view engine', 'html');
 	app.use(express.static(app.get('statics')));
-
+	app.use(notemplate.middleware); // initialize document.location
 
 Usage
 -----
