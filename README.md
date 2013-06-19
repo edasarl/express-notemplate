@@ -88,10 +88,15 @@ events that can be listened to :
 	Listener arguments : view, opts  
 * render
 	called after page-bound handlers  
-	Listener arguments : view, opts
+	Listener arguments : view, opts  
+	view.instance.toString() will serialize dom (respecting fragment options),
+	and setting view.instance.output will prevent next step from calling toString.
 * output
 	called after DOM is serialized to xhtml string  
-	Listener argument : { output : <str> }, opts
+	Listener argument : instance, opts
+	instance.output is set and can be modified. Make sure it is a string or buffer
+	before modifying it, since a 'render' listener might have set it to something
+	else than a string (a stream, for example).
 
 
 Usage :

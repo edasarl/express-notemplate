@@ -1,3 +1,12 @@
+Version 0.1.13
+==============
+
+* Add view.instance to the view parameter of 'render' listeners.
+  Pass instance as the parameter of 'output' listeners.
+  view.instance.window, view.instance.toString,
+  and use view.instance.output to determine if toString
+  must be called or not.
+
 Version 0.1.12
 ==============
 
