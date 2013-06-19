@@ -85,27 +85,43 @@ function merge(view, options, callback) {
 	var $ = window.$;
 	var document = window.document;
 	document.replaceChild(view.root.cloneNode(true), document.documentElement);
+	// view is a template, view.instance is a per-location instance of the template
+	var instance = {
+		window: window,
+		options: options
+	};
+	instance.toString = toString.bind(instance);
+	view.instance = instance;
+	
 	// global listeners
 	notemplate.emit('data', view, options);
 	// listeners from scripts loaded inside view.window
 	$(document).triggerHandler('data', options);
+
 	// global listeners
+	
 	notemplate.emit('render', view, options);
+
+	if (!instance.output) instance.output = instance.toString();
+	
+	notemplate.emit('output', instance, options);
+	callback(null, instance.output);
+}
+
+function toString() {
+	var doc = this.window.document;
 	var output;
-	if (options.fragment) output = outer($(options.fragment)); // output selected nodes
+	if (this.options.fragment) output = outer(this.window.$(this.options.fragment)); // output selected nodes
 	else {
-		output = document.outerHTML;
+		output = doc.outerHTML;
 		if (output.length < 2 || output.substr(0, 2) != "<!") {
 			// add <!DOCTYPE... when missing (problem with parser)
-			var docstr = document.doctype.toString();
+			var docstr = doc.doctype.toString();
 			if (output.length && output[0] != "\n") docstr += "\n";
 			output = docstr + output;
 		}
 	}
-	// global listeners can modify output (sync)
-	var obj = { output : output };
-	notemplate.emit('output', obj, options);
-	callback(null, obj.output);
+	return output;
 }
 
 notemplate.__express = function(filename, options, callback) {
