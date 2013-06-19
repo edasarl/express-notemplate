@@ -52,6 +52,10 @@ Then express-notemplate will load the html file into a DOM, add window.$ to it, 
 		$(document).on('data', function(e, data) {
 			$('body').html(data.mydata.body);
 		});
+		$(document).ready(function() {
+			if (window.navigator.server) return; // is true when run on server inside notemplate. Will change when jsdom supports it.
+			// do client ui stuff here that won't be useful on server
+		});
 	</script>
 
 
