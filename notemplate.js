@@ -99,6 +99,8 @@ function merge(view, options, callback) {
 	var $ = window.$;
 	var document = window.document;
 	document.replaceChild(view.root.cloneNode(true), document.documentElement);
+	// make sure data listeners are removed
+	window.jQuery(document).off('data');
 	// call all pending document.ready listeners
 	window.jQuery.isReady = false;
 	window.jQuery.ready();
