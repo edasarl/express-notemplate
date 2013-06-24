@@ -55,7 +55,8 @@ function getWindow(str, href) {
 	window.navigator.server = true;
 	window.console = console;
 	var tempfun = window.setTimeout;
-	window.setTimeout = function(fun, tt) { fun(); };
+	// jQuery calls setTimeout(jQuery.ready) once
+	window.setTimeout = function(fun, tt) {};
 	window.run(jquery);
 	window.setTimeout = tempfun;
 	window.jQuery._evalUrl = window.jQuery.globalEval = function() {};
@@ -85,6 +86,8 @@ function merge(view, options, callback) {
 	var $ = window.$;
 	var document = window.document;
 	document.replaceChild(view.root.cloneNode(true), document.documentElement);
+	// call all pending document.ready listeners
+	window.jQuery.ready();
 	// view is a template, view.instance is a per-location instance of the template
 	var instance = {
 		window: window,
