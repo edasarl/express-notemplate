@@ -77,26 +77,35 @@ The "notemplate" attribute is removed from html output.
 Middleware
 ----------
 
-Aside from page-bound scripts for merging data, there are several 'global'
-events that can be listened to :
+Only page-bound scripts can listen to these events:
 
-* ready
-	page DOM loaded in view.window - jquery and other scripts are available, as usual  
-	Listener arguments : view, opts
-* data
-  called before any page-bound handlers, all page-bound scripts being loaded  
-	Listener arguments : view, opts  
-* render
-	called after page-bound handlers  
-	Listener arguments : view, opts  
-	view.instance.toString() will serialize dom (respecting fragment options),
-	and setting view.instance.output will prevent next step from calling toString.
-* output
-	called after DOM is serialized to xhtml string  
-	Listener argument : instance, opts
-	instance.output is set and can be modified. Make sure it is a string or buffer
-	before modifying it, since a 'render' listener might have set it to something
-	else than a string (a stream, for example).
+* $(document).ready(function() {})
+  the usual document.ready event.  
+  Modifying DOM before that event is unsupported.
+  Use notemplate.ready to do just that.
+* $(document).on('data', function(e, obj) {})
+  obj can be the options object given by express to template engines render method.  
+  It can also be a simple object received through other channels (say a message
+  from a websocket connection).
+  It is advised to check for existence of obj.mydatakey before trying to use it.  
+  Listener arguments : e, locals
+
+
+Only nodejs-bound scripts can listen to these events (emitted by notemplate):
+
+* notemplate.on('ready', function(view, opts) {})
+	DOM is loaded in view.window and will be copied over each new page instance.
+	Only jquery is available.
+* notemplate.on('data', function(view, opts) {})
+  called just before document.data handlers.
+* notemplate.on('render', function(view, opts) {})
+	called just after document.data handlers.  
+	view.instance.toString() will serialize dom, respecting fragment options.  
+	Setting view.instance.output will prevent next step from calling toString.
+* notemplate.on('output', function(instance, opts) {})
+	called just after instance.output has been set.  
+	instance.output can be anything, since it can be customized in a render event
+	listener before. See usage below.
 
 
 Usage :
@@ -120,8 +129,10 @@ Usage :
 
 A typical use of middleware is in notemplate-minify.
 
+A typical use of render event middleware is in notemplate-archive.
 
-Features
---------
+
+Tips
+----
 
 * console.log works in the jsdom context.

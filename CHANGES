@@ -1,3 +1,15 @@
+Version 0.1.14
+==============
+
+* Fix policy on ready events :
+  document.ready is now correctly emitted after the page has been instanciated.
+  Before that, page-bound scripts would not act upon the same documentElement,
+  forcing node selection to be done only in document.data event.  
+  notemplate.ready is still emitted before the page has been instanciated,
+  allowing to change the template before it becomes a page.
+
+* Rewrite parts of README.
+
 Version 0.1.13
 ==============
 
