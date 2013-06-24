@@ -59,7 +59,20 @@ function getWindow(str, href) {
 	window.setTimeout = function(fun, tt) {};
 	window.run(jquery);
 	window.setTimeout = tempfun;
-	window.jQuery._evalUrl = window.jQuery.globalEval = function() {};
+	var $ = window.jQuery;
+	$._evalUrl = $.globalEval = function() {};
+	// short-circuit jQuery dom ready handling
+	$.readyListeners = [];
+	$.fn.ready = function(obj) {
+		$.readyListeners.push(obj);
+	};
+	$.ready = function() {
+		window.jQuery.isReady = true;
+		$.readyListeners.forEach(function(fn) {
+			fn.call(window.document, $);
+		});
+	};
+	
 	return window;
 }
 
@@ -87,6 +100,7 @@ function merge(view, options, callback) {
 	var document = window.document;
 	document.replaceChild(view.root.cloneNode(true), document.documentElement);
 	// call all pending document.ready listeners
+	window.jQuery.isReady = false;
 	window.jQuery.ready();
 	// view is a template, view.instance is a per-location instance of the template
 	var instance = {
