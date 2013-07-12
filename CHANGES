@@ -1,3 +1,11 @@
+Version 0.1.16
+==============
+
+* the view cache has no real performance gain and is leaky. Remove it.
+* if instance.output is an EventEmitter, call window.close on its end
+  and error events (or else window could be closed before we stop using
+  it).
+
 Version 0.1.15
 ==============
 

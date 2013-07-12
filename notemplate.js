@@ -20,26 +20,18 @@ jsdom.defaultDocumentFeatures = {
 
 var notemplate = module.exports = new EventEmitter();
 
-var views = Object.create(null);
-
 // keep that in memory
 var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js')).toString();
 
 
 function load(path, href, cb) {
-	var view = views[path] || { path: path };
+	var view = { path: path };
 	fs.stat(path, function(err, result) {
 		if (err) return cb(err);
-		if (view.mtime && result.mtime <= view.mtime) {
-			view.hit = true;
-			return cb(null, view);
-		}
 		fs.readFile(view.path, function(err, str) {
 			if (err) return cb(err, view);
 			view.window = getWindow(str, href);
 			view.mtime = result.mtime;
-			view.hit = false;
-			views[view.path] = view;
 			return cb(null, view);
 		});		
 	});
@@ -61,17 +53,6 @@ function getWindow(str, href) {
 	window.setTimeout = tempfun;
 	var $ = window.jQuery;
 	$._evalUrl = $.globalEval = function() {};
-	// short-circuit jQuery dom ready handling
-	$.readyListeners = [];
-	$.fn.ready = function(obj) {
-		$.readyListeners.push(obj);
-	};
-	$.ready = function() {
-		window.jQuery.isReady = true;
-		$.readyListeners.forEach(function(fn) {
-			fn.call(window.document, $);
-		});
-	};
 	
 	return window;
 }
@@ -98,12 +79,8 @@ function merge(view, options, callback) {
 	var window = view.window;
 	var $ = window.$;
 	var document = window.document;
-	document.replaceChild(view.root.cloneNode(true), document.documentElement);
-	// make sure data listeners are removed
-	window.jQuery(document).off('data');
 	// call all pending document.ready listeners
-	window.jQuery.isReady = false;
-	window.jQuery.ready();
+	window.jQuery.ready(true);
 	// view is a template, view.instance is a per-location instance of the template
 	var instance = {
 		window: window,
@@ -116,15 +93,29 @@ function merge(view, options, callback) {
 	notemplate.emit('data', view, options);
 	// listeners from scripts loaded inside view.window
 	$(document).triggerHandler('data', options);
-
 	// global listeners
 	
 	notemplate.emit('render', view, options);
 
 	if (!instance.output) instance.output = instance.toString();
-	
 	notemplate.emit('output', instance, options);
+	var funClose = function() { close(view); view = null; };
+	// notemplate-archive has a typical example of such an instance.output
+	if (instance.output instanceof EventEmitter) {
+		instance.output.on('end', funClose);
+		instance.output.on('error', funClose);
+	} else {
+		funClose();
+	}
 	callback(null, instance.output);
+}
+
+function close(view) {
+	if (view.instance) {
+		view.instance.window.close();
+		delete view.instance.window;
+		delete view.instance;
+	}
 }
 
 function toString() {
@@ -147,40 +138,35 @@ notemplate.__express = function(filename, options, callback) {
 	load(filename, options.settings.href, function(err, view) {
 		if (err) return callback(err);
 		// the first time the DOM is ready is an event
-		var window = view.window;
-		if (!view.hit) {
-			Step(function() {
-				var group = this.group();
-				window.$('script').each(function() {
-					var script = this;
-					var done = group();
-					var att = script.attributes.notemplate;
-					// default is notemplate="client"
-					if (!att) return done();
-					att = att.value;
-					script.attributes.removeNamedItem('notemplate');
-					// any other value is "client"
-					if (att != "server" && att != "both") return done();
-					var src = script.attributes.src;
-					// html5 runs script content only when src is not set
-					if (!src && script.textContent) window.run(script.textContent);
-					if (att == "server") script.parentNode.removeChild(script);
-					if (!src) return done();
-					loadScript(options.settings.statics || process.cwd() + '/public', src.value, done);
-				});
-			}, function(err, scripts) {
-				if (err) console.error(err); // errors are not fatal
-				scripts.forEach(function(txt) {
-					if (txt) window.run(txt.toString());
-				});
-				notemplate.emit('ready', view, options);
-				view.hit = true;
-				view.root = window.document.documentElement;
-				// all scripts have been loaded
-				// now we can deal with data merging
-				merge(view, options, callback);
+		Step(function() {
+			var group = this.group();
+			view.window.$('script').each(function() {
+				var script = this;
+				var done = group();
+				var att = script.attributes.notemplate;
+				// default is notemplate="client"
+				if (!att) return done();
+				att = att.value;
+				script.attributes.removeNamedItem('notemplate');
+				// any other value is "client"
+				if (att != "server" && att != "both") return done();
+				var src = script.attributes.src;
+				// html5 runs script content only when src is not set
+				if (!src && script.textContent) view.window.run(script.textContent);
+				if (att == "server") script.parentNode.removeChild(script);
+				if (!src) return done();
+				loadScript(options.settings.statics || process.cwd() + '/public', src.value, done);
 			});
-		} else merge(view, options, callback);
+		}, function(err, scripts) {
+			if (err) console.error(err); // errors are not fatal
+			scripts.forEach(function(txt) {
+				if (txt) view.window.run(txt.toString());
+			});
+			notemplate.emit('ready', view, options);
+			// all scripts have been loaded
+			// now we can deal with data merging
+			merge(view, options, callback);
+		});
 	});
 };
 
