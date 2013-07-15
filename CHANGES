@@ -1,3 +1,11 @@
+Version 0.1.17
+==============
+
+* Limited IE-style conditional comments support (must be in <head>, must
+  contain only one tag, !IE not supported). The comment is replaced by
+  its content and get notemplate:comment-start notemplate:comment-end
+  attributes before and after data/render events.
+
 Version 0.1.16
 ==============
 

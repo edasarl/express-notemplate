@@ -73,6 +73,10 @@ script tags can have attribute notemplate = server | client | both :
 
 The "notemplate" attribute is removed from html output.
 
+IE-style conditional comments are replaced by the tag they contain (provided there is only one tag in it),
+before document.ready event and are restored before output event. It allows all notemplate middleware
+to process the nodes hidden within those comments the same way as other nodes.
+
 
 Middleware
 ----------
