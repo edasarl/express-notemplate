@@ -100,7 +100,6 @@ function restoreCommentedTags(win) {
 	var $ = win.$;
 	var helper = win.document.createElement('div');
 	$(win.document.head).find('[notemplate\\:comment-start]').each(function() {
-		console.log(this.outerHTML);
 		var comment = win.document.createComment("");
 		$(this).replaceWith(comment);
 		helper.appendChild(this);
