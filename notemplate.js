@@ -75,10 +75,48 @@ function outer($nodes) {
 	return ret;
 }
 
+function replaceCommentedTags(win) {
+	var reg = /^\s*(\[if\s[^\]]+\]>)(.*)(<\!\[endif\])\s*$/
+	var helper = win.document.createElement('div');
+	var node = win.document.head.firstChild;
+	while (node) {
+		var cur = node;
+		node = node.nextSibling;
+		if (cur.nodeType != 8) continue;
+		var match = reg.exec(cur.data);
+		if (!match || match.length != 4) continue;
+		helper.innerHTML = match[2].trim();
+		var newNode = helper.firstChild;
+		if (!newNode || newNode.nodeType != 1) continue;
+		var parent = cur.parentNode;
+		parent.insertBefore(newNode, cur);
+		parent.removeChild(cur);
+		newNode.setAttribute('notemplate:comment-start', match[1]);
+		newNode.setAttribute('notemplate:comment-end', match[3]);
+	}
+}
+
+function restoreCommentedTags(win) {
+	var $ = win.$;
+	var helper = win.document.createElement('div');
+	$(win.document.head).find('[notemplate\\:comment-start]').each(function() {
+		console.log(this.outerHTML);
+		var comment = win.document.createComment("");
+		$(this).replaceWith(comment);
+		helper.appendChild(this);
+		var start = this.getAttribute('notemplate:comment-start');
+		this.attributes.removeNamedItem('notemplate:comment-start');
+		var end = this.getAttribute('notemplate:comment-end');
+		this.attributes.removeNamedItem('notemplate:comment-end');
+		comment.data = start + helper.innerHTML + end;
+	});
+}
+
 function merge(view, options, callback) {
 	var window = view.window;
 	var $ = window.$;
 	var document = window.document;
+	replaceCommentedTags(window);
 	// call all pending document.ready listeners
 	window.jQuery.ready(true);
 	// view is a template, view.instance is a per-location instance of the template
@@ -97,6 +135,8 @@ function merge(view, options, callback) {
 	
 	notemplate.emit('render', view, options);
 
+	restoreCommentedTags(window);
+	
 	if (!instance.output) instance.output = instance.toString();
 	notemplate.emit('output', instance, options);
 	var funClose = function() { close(view); view = null; };
