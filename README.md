@@ -136,6 +136,16 @@ A typical use of middleware is in notemplate-minify.
 A typical use of render event middleware is in notemplate-archive.
 
 
+Quick jsdom window with jquery
+------------------------------
+
+If you need quick access to an empty DOM with jquery,
+
+  require('notemplate').window(htmlstr, href)
+
+is what you need.
+
+
 Tips
 ----
 

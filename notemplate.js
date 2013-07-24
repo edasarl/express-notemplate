@@ -57,6 +57,8 @@ function getWindow(str, href) {
 	return window;
 }
 
+notemplate.window = getWindow;
+
 function loadScript(root, src, cb) {
 	var url = URL.parse(src);
 	if (url.hostname) return cb(format("express-notemplate error - cannot load remote script\n%s", src), null);

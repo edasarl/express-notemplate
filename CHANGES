@@ -1,3 +1,10 @@
+Version 0.1.18
+==============
+
+* require('notemplate').window(htmlstr, href) returns a window with
+  window.$ jquery, optionally parsing htmlstr into it.
+  href can be used to set document.location.
+
 Version 0.1.17
 ==============
 
