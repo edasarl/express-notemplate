@@ -25,16 +25,73 @@ var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-brow
 
 
 function load(path, href, cb) {
-	var view = { path: path };
+	var view = {
+		path: path,
+		asyncs: [],
+		merge: mergeView,
+		render: renderView,
+		done: doneView,
+		close: closeView
+	};
 	fs.stat(path, function(err, result) {
 		if (err) return cb(err);
 		fs.readFile(view.path, function(err, str) {
 			if (err) return cb(err, view);
 			view.window = getWindow(str, href);
+			handleXhrs(view);
+			handleTimeouts(view);
 			view.mtime = result.mtime;
 			return cb(null, view);
-		});		
+		});
 	});
+}
+
+function handleXhrs(view) {
+	var window = view.window;
+	var wxhr = window.XMLHttpRequest;
+	window.XMLHttpRequest = function() {
+		var xhr = wxhr();
+		var xhrSend = xhr.send;
+		xhr.send = function(data) {
+			// while xhr is typically not reused, it can happen, so support it
+			function listenXhr() {
+				if (this.readyState != 4) return;
+				xhr.removeEventListener(arguments.callee);
+				arguments.callee.done = true;
+				view.done();
+			}
+			xhr.addEventListener("readystatechange", listenXhr);
+			view.asyncs.push(listenXhr);
+			var ret, err
+			try {
+				ret = xhrSend.call(xhr, data);
+			} catch(e) {
+				err = e;
+			}
+			if (xhr.readyState == 4 || err) {
+				// free it now
+				listenXhr();
+			} // else the call was asynchronous and no error was thrown
+			if (err) throw err; // rethrow
+			return ret;
+		};
+		return xhr;
+	};
+}
+
+function handleTimeouts(view) {
+	var window = view.window;
+	var wto = window.setTimeout;
+	window.setTimeout = function(fun, delay) {
+		var args = Array.prototype.slice.call(arguments, 2);
+		function listenTo() {
+			fun.apply(null, args);
+			arguments.callee.done = true;
+			view.done();
+		}
+		view.asyncs.push(listenTo);
+		return wto(listenTo, delay);
+	};
 }
 
 function getWindow(str, href) {
@@ -53,7 +110,6 @@ function getWindow(str, href) {
 	window.setTimeout = tempfun;
 	var $ = window.jQuery;
 	$._evalUrl = $.globalEval = function() {};
-	
 	return window;
 }
 
@@ -113,8 +169,8 @@ function restoreCommentedTags(win) {
 	});
 }
 
-function merge(view, options, callback) {
-	var window = view.window;
+function mergeView(options) {
+	var window = this.window;
 	var $ = window.$;
 	var document = window.document;
 	replaceCommentedTags(window);
@@ -126,21 +182,28 @@ function merge(view, options, callback) {
 		options: options
 	};
 	instance.toString = toString.bind(instance);
-	view.instance = instance;
-	
+	this.instance = instance;
+
 	// global listeners
-	notemplate.emit('data', view, options);
+	notemplate.emit('data', this, options);
 	// listeners from scripts loaded inside view.window
 	$(document).triggerHandler('data', options);
+	this.done();
+}
+
+function renderView() {
+	var view = this;
+	var instance = view.instance;
+	var window = instance.window;
 	// global listeners
-	
-	notemplate.emit('render', view, options);
+	notemplate.emit('render', view, instance.options);
 
 	restoreCommentedTags(window);
-	
+
 	if (!instance.output) instance.output = instance.toString();
-	notemplate.emit('output', instance, options);
-	var funClose = function() { close(view); view = null; };
+	notemplate.emit('output', instance, instance.options);
+	var cb = view.callback;
+	var funClose = function() { view.close(); };
 	// notemplate-archive has a typical example of such an instance.output
 	if (instance.output instanceof EventEmitter) {
 		instance.output.on('end', funClose);
@@ -148,15 +211,26 @@ function merge(view, options, callback) {
 	} else {
 		funClose();
 	}
-	callback(null, instance.output);
+	cb(null, instance.output);
 }
 
-function close(view) {
-	if (view.instance) {
-		view.instance.window.close();
-		delete view.instance.window;
-		delete view.instance;
+function doneView() {
+	var asyncs = this.asyncs;
+	for (var i=0, len=asyncs.length; i < len; i++) {
+		if (!asyncs[i].done) return;
 	}
+	// render if there was no asyncs registered or they were all done
+	this.render();
+}
+
+function closeView() {
+	if (this.instance) {
+		this.instance.window.close();
+		delete this.instance.window;
+		delete this.instance;
+	}
+	this.asyncs = null;
+	this.callback = null;
 }
 
 function toString() {
@@ -206,7 +280,8 @@ notemplate.__express = function(filename, options, callback) {
 			notemplate.emit('ready', view, options);
 			// all scripts have been loaded
 			// now we can deal with data merging
-			merge(view, options, callback);
+			view.callback = callback;
+			view.merge(options);
 		});
 	});
 };
