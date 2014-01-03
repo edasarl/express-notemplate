@@ -1,3 +1,9 @@
+Version 0.1.19
+==============
+
+* The 'render' event is emitted upon completion of asynchronous calls
+  like XMLHttpRequest and setTimeout.
+
 Version 0.1.18
 ==============
 

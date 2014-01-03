@@ -94,6 +94,10 @@ Only page-bound scripts can listen to these events:
   It is advised to check for existence of obj.mydatakey before trying to use it.  
   Listener arguments : e, locals
 
+New in version 0.1.19: page-bound scripts have allowed to use XMLHttpRequest
+and can setup setTimeout calls - the render event is guaranteed to be called
+upon completion of the handlers of those calls.
+
 
 Only nodejs-bound scripts can listen to these events (emitted by notemplate):
 
