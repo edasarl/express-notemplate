@@ -44,7 +44,7 @@ function getWindow(str, href) {
 	};
 	if (Parser) opts.parser = Parser;
 	var window = jsdom.jsdom(str, "2", opts).createWindow();
-	window.navigator.server = true;
+	window.navigator.server = true; // backward-compatibility - jsdom already sets window.navigator.noUI = true
 	window.console = console;
 	var tempfun = window.setTimeout;
 	// jQuery calls setTimeout(jQuery.ready) once
