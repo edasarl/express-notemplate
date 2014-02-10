@@ -11,8 +11,7 @@ The glue code that merges data into the view is easy to maintain, and can be run
 There is no artificial syntax, no unnecessary abstraction.
 Just familiar DOM and javascript.
 
-In particular, this allows one to merge new data on the clients using a messenging system using the exact same code
-as what is needed on the server to output html.
+In particular, this allows one to merge new data on the clients using a messenging system using the exact same code as what is needed on the server to output html.
 
 The only extra is a jQuery $ object provided by default on server.
 (if the javascript code is not used on clients, jQuery is not needed on clients).
@@ -84,14 +83,12 @@ Middleware
 Only page-bound scripts can listen to these events:
 
 * $(document).ready(function() {})
-  the usual document.ready event.  
-  Modifying DOM before that event is unsupported.
-  Use notemplate.ready to do just that.
+  the usual document.ready event.
 * $(document).on('data', function(e, obj) {})
-  obj can be the options object given by express to template engines render method.  
+  obj can be the options object given by express to template engines render method.
   It can also be a simple object received through other channels (say a message
   from a websocket connection).
-  It is advised to check for existence of obj.mydatakey before trying to use it.  
+  It is advised to check for existence of obj.mydatakey before trying to use it.
   Listener arguments : e, locals
 
 New in version 0.1.19: page-bound scripts have allowed to use XMLHttpRequest
@@ -102,16 +99,21 @@ upon completion of the handlers of those calls.
 Only nodejs-bound scripts can listen to these events (emitted by notemplate):
 
 * notemplate.on('ready', function(view, opts) {})
-	DOM is loaded in view.window and will be copied over each new page instance.
-	Only jquery is available.
+	DOM is ready in view.window, but only jquery is available; other scripts
+	are not yet evaluated. It's a way to listen to the 'ready' event before
+	any other script does.
 * notemplate.on('data', function(view, opts) {})
   called just before document.data handlers.
+* notemplate.on('request', function(method, url, status, data) {})
+	The document made an XHR request with method, url and received status
+	(http code), data.
+	Called between 'ready' and 'render' events.
 * notemplate.on('render', function(view, opts) {})
-	called just after document.data handlers.  
-	view.instance.toString() will serialize dom, respecting fragment options.  
+	called just after document.data handlers.
+	view.instance.toString() will serialize dom, respecting fragment options.
 	Setting view.instance.output will prevent next step from calling toString.
 * notemplate.on('output', function(instance, opts) {})
-	called just after instance.output has been set.  
+	called just after instance.output has been set.
 	instance.output can be anything, since it can be customized in a render event
 	listener before. See usage below.
 
@@ -127,7 +129,7 @@ Usage :
 	opts.locals.mydata
 	opts.mydata
 	opts.use(...)
-		
+
 
 	var notemplate = require('express-notemplate');
 	../..
