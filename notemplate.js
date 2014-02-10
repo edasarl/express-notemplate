@@ -29,6 +29,7 @@ function load(path, href, cb) {
 		path: path,
 		asyncs: [],
 		merge: mergeView,
+		request: requestView,
 		render: renderView,
 		done: doneView,
 		close: closeView
@@ -52,23 +53,30 @@ function handleXhrs(view) {
 	window.XMLHttpRequest = function() {
 		var xhr = wxhr();
 		var xhrSend = xhr.send;
+		var xhrOpen = xhr.open;
+		xhr.open = function(method, url) {
+			this.request = [method, url];
+			return xhrOpen.apply(this, Array.prototype.slice.call(arguments, 0));
+		};
 		xhr.send = function(data) {
 			// while xhr is typically not reused, it can happen, so support it
+			var self = this;
 			function listenXhr() {
 				if (this.readyState != 4) return;
-				xhr.removeEventListener(arguments.callee);
+				self.removeEventListener(arguments.callee);
 				arguments.callee.done = true;
+				view.request(self.request[0], self.request[1], self.status, self.responseText);
 				view.done();
 			}
-			xhr.addEventListener("readystatechange", listenXhr);
+			this.addEventListener("readystatechange", listenXhr);
 			view.asyncs.push(listenXhr);
 			var ret, err
 			try {
-				ret = xhrSend.call(xhr, data);
+				ret = xhrSend.call(this, data);
 			} catch(e) {
 				err = e;
 			}
-			if (xhr.readyState == 4 || err) {
+			if (this.readyState == 4 || err) {
 				// free it now
 				listenXhr();
 			} // else the call was asynchronous and no error was thrown
@@ -167,6 +175,10 @@ function restoreCommentedTags(win) {
 		this.attributes.removeNamedItem('notemplate:comment-end');
 		comment.data = start + helper.innerHTML + end;
 	});
+}
+
+function requestView(method, url, status, response) {
+	notemplate.emit('request', this, method, url, status, response);
 }
 
 function mergeView(options) {
