@@ -286,10 +286,10 @@ notemplate.__express = function(filename, options, callback) {
 			});
 		}, function(err, scripts) {
 			if (err) console.error(err); // errors are not fatal
+			notemplate.emit('ready', view, options);
 			scripts.forEach(function(txt) {
 				if (txt) view.window.run(txt.toString());
 			});
-			notemplate.emit('ready', view, options);
 			// all scripts have been loaded
 			// now we can deal with data merging
 			view.callback = callback;
