@@ -262,7 +262,7 @@ function toString() {
 }
 
 notemplate.__express = function(filename, options, callback) {
-	load(filename, options.settings.href, function(err, view) {
+	load(filename, options.href, function(err, view) {
 		if (err) return callback(err);
 		// the first time the DOM is ready is an event
 		Step(function() {
@@ -299,7 +299,7 @@ notemplate.__express = function(filename, options, callback) {
 };
 
 notemplate.middleware = function(req, res, next) {
-	req.app.settings.href = req.protocol + '://' + req.headers.host + req.url;
+	res.locals.href = req.protocol + '://' + req.headers.host + req.url;
 	next();
 };
 
