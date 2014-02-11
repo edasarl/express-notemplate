@@ -64,9 +64,9 @@ function handleXhrs(view) {
 			function listenXhr() {
 				if (this.readyState != 4) return;
 				self.removeEventListener(arguments.callee);
-				arguments.callee.done = true;
 				view.request(self.request[0], self.request[1], self.status, self.responseText);
-				view.done();
+				arguments.callee.done = true;
+				process.nextTick(function() {view.done();});
 			}
 			this.addEventListener("readystatechange", listenXhr);
 			view.asyncs.push(listenXhr);
@@ -95,7 +95,7 @@ function handleTimeouts(view) {
 		function listenTo() {
 			fun.apply(null, args);
 			arguments.callee.done = true;
-			view.done();
+			process.nextTick(function() {view.done();});
 		}
 		view.asyncs.push(listenTo);
 		return wto(listenTo, delay);
