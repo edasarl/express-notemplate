@@ -200,6 +200,7 @@ function mergeView(options) {
 	notemplate.emit('data', this, options);
 	// listeners from scripts loaded inside view.window
 	$(document).triggerHandler('data', options);
+	$(window).triggerHandler('load');
 	this.done();
 }
 
