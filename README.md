@@ -90,8 +90,11 @@ Only page-bound scripts can listen to these events:
   from a websocket connection).
   It is advised to check for existence of obj.mydatakey before trying to use it.
   Listener arguments : e, locals
+* $(window).on('load', function() {})
+	after all data event listeners has been called.
+	It more or less matches the browser event.
 
-New in version 0.1.19: page-bound scripts have allowed to use XMLHttpRequest
+New in version 0.2.0: page-bound scripts are allowed to use XMLHttpRequest
 and can setup setTimeout calls - the render event is guaranteed to be called
 upon completion of the handlers of those calls.
 

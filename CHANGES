@@ -1,9 +1,11 @@
-Version 0.1.20
-==============
+Version 0.2.0
+=============
 
 * xhr requests emit nodejs-bound 'request' events with
   (method, url, status, data) passed as parameters to the listeners.
   This allows tracking of the resources used by a document.
+* window 'load' event is triggered after all listeners of 'data' event
+  have been called.
 
 Version 0.1.19
 ==============
