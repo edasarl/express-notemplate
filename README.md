@@ -145,6 +145,14 @@ A typical use of middleware is in notemplate-minify.
 A typical use of render event middleware is in notemplate-archive.
 
 
+Error handling
+--------------
+
+Starting with version 0.2.2 each page runs into its own domain, so all
+errors are caught and passed on to express error handling mecanism.
+The domain the page is run in is disposed afterwise.
+
+
 Quick jsdom window with jquery
 ------------------------------
 

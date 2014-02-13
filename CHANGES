@@ -1,3 +1,13 @@
+Version 0.2.2
+=============
+
+* run client scripts inside a domain. Catch errors, dispose of domain.
+
+Version 0.2.1
+=============
+
+* add dependency on node-canvas. Not really used for the moment.
+
 Version 0.2.0
 =============
 
