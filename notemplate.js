@@ -1,3 +1,4 @@
+var domain = require('domain');
 var jsdom = require('jsdom');
 var Path = require('path');
 var URL = require('url');
@@ -206,23 +207,26 @@ function mergeView(options) {
 
 function renderView() {
 	var view = this;
+	view.domain.exit();
 	var instance = view.instance;
 	var window = instance.window;
 	// global listeners
-	notemplate.emit('render', view, instance.options);
-
-	restoreCommentedTags(window);
-
-	if (!instance.output) instance.output = instance.toString();
-	notemplate.emit('output', instance, instance.options);
+	try {
+		notemplate.emit('render', view, instance.options);
+		restoreCommentedTags(window);
+		if (!instance.output) instance.output = instance.toString();
+		notemplate.emit('output', instance, instance.options);
+	} catch(e) {
+		return view.close(e);
+	}
+	var funClose = function(err) { view.close(err); };
 	var cb = view.callback;
-	var funClose = function() { view.close(); };
 	// notemplate-archive has a typical example of such an instance.output
 	if (instance.output instanceof EventEmitter) {
 		instance.output.on('end', funClose);
 		instance.output.on('error', funClose);
 	} else {
-		funClose();
+		view.close();
 	}
 	cb(null, instance.output);
 }
@@ -236,14 +240,21 @@ function doneView() {
 	this.render();
 }
 
-function closeView() {
+function closeView(err) {
 	if (this.instance) {
 		this.instance.window.close();
 		delete this.instance.window;
 		delete this.instance;
 	}
 	this.asyncs = null;
-	this.callback = null;
+	if (this.domain) {
+		this.domain.dispose();
+		this.domain = null;
+	}
+	if (err && this.callback) {
+		this.callback(err);
+		this.callback = null;
+	}
 }
 
 function toString() {
@@ -288,13 +299,15 @@ notemplate.__express = function(filename, options, callback) {
 		}, function(err, scripts) {
 			if (err) console.error(err); // errors are not fatal
 			notemplate.emit('ready', view, options);
-			scripts.forEach(function(txt) {
-				if (txt) view.window.run(txt.toString());
-			});
-			// all scripts have been loaded
-			// now we can deal with data merging
 			view.callback = callback;
-			view.merge(options);
+			view.domain = domain.create();
+			view.domain.on('error', function(err) { view.close(err); });
+			view.domain.run(function() {
+				scripts.forEach(function(txt) {
+					if (txt) view.window.run(txt.toString());
+				});
+				view.merge(options);
+			});
 		});
 	});
 };
