@@ -1,3 +1,9 @@
+Version 0.2.3
+=============
+
+* drop dependency on node-canvas. It is up to the program using this
+  module to depend on it.
+
 Version 0.2.2
 =============
 
