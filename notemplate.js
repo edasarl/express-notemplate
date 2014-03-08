@@ -62,10 +62,10 @@ function handleXhrs(view) {
 		xhr.send = function(data) {
 			// while xhr is typically not reused, it can happen, so support it
 			var self = this;
-			function listenXhr() {
-				if (this.readyState != 4) return;
+			function listenXhr(err) {
+				if (this.readyState != 4 && !err) return;
 				self.removeEventListener(arguments.callee);
-				view.request(self.request[0], self.request[1], self.status, self.responseText);
+				if (!err) view.request(self.request[0], self.request[1], self.status, self.responseText);
 				arguments.callee.done = true;
 				process.nextTick(function() {view.done();});
 			}
@@ -79,7 +79,7 @@ function handleXhrs(view) {
 			}
 			if (this.readyState == 4 || err) {
 				// free it now
-				listenXhr();
+				listenXhr(err);
 			} // else the call was asynchronous and no error was thrown
 			if (err) throw err; // rethrow
 			return ret;
@@ -94,9 +94,15 @@ function handleTimeouts(view) {
 	window.setTimeout = function(fun, delay) {
 		var args = Array.prototype.slice.call(arguments, 2);
 		function listenTo() {
-			fun.apply(null, args);
+			var err;
+			try {
+				fun.apply(null, args);
+			} catch (e) {
+				err = e;
+			}
 			arguments.callee.done = true;
 			process.nextTick(function() {view.done();});
+			if (err) throw err; // rethrow
 		}
 		view.asyncs.push(listenTo);
 		return wto(listenTo, delay);
