@@ -1,3 +1,9 @@
+Version 0.2.4
+=============
+
+* cleanup after xhr request error, rethrow error after timeout handler
+  error.
+
 Version 0.2.3
 =============
 
