@@ -1,3 +1,11 @@
+Version 0.2.5
+=============
+
+* depends on custom node-XMLHttpRequest@1.5.1 module with optional
+  http agent. Use globalAgent.
+  This requires removal of previously installed module located at:
+  node_modules/jsdom/node_modules/xmlhttprequest
+
 Version 0.2.4
 =============
 
