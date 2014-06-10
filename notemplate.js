@@ -7,6 +7,7 @@ var fs = require('fs');
 var Step = require('step');
 var format = require('util').format;
 var fexists = fs.exists || Path.exists;
+
 var Parser;
 try {
 	Parser = require('html5');
@@ -17,6 +18,14 @@ jsdom.defaultDocumentFeatures = {
 	ProcessExternalResources: false,			// same
 	MutationEvents: false,								// not needed
 	QuerySelector: false									// not needed, we use jquery's bundled sizzle instead of jsdom's one.
+};
+
+// force usage of globalAgent before jsdom instantiates XMLHttpRequest
+var xhrModule = require('xmlhttprequest');
+var Xhr = xhrModule.XMLHttpRequest;
+var globalAgent = require('http').globalAgent;
+xhrModule.XMLHttpRequest = function() {
+  return new Xhr({agent: globalAgent});
 };
 
 var notemplate = module.exports = new EventEmitter();
