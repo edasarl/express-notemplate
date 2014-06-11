@@ -31,7 +31,7 @@ xhrModule.XMLHttpRequest = function() {
 var notemplate = module.exports = new EventEmitter();
 
 // keep that in memory
-var jquery = fs.readFileSync(Path.join(Path.dirname(require.resolve('jquery-browser')), 'lib/jquery.js')).toString();
+var jquery = fs.readFileSync(require.resolve('jquery')).toString();
 
 
 function load(path, href, cb) {
