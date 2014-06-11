@@ -1,3 +1,8 @@
+Version 0.2.6
+=============
+
+* depends on jquery package, jquery-browser is no longer needed.
+
 Version 0.2.5
 =============
 
