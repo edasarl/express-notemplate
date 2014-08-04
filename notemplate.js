@@ -42,7 +42,8 @@ function load(path, href, cb) {
 		request: requestView,
 		render: renderView,
 		done: doneView,
-		close: closeView
+		close: closeView,
+		ending: false
 	};
 	fs.stat(path, function(err, result) {
 		if (err) return cb(err);
@@ -75,6 +76,7 @@ function handleXhrs(view) {
 				if (this.readyState != 4 && !err) return;
 				self.removeEventListener(arguments.callee);
 				if (!err) view.request(self.request[0], self.request[1], self.status, self.responseText);
+				if (view.ending) return;
 				arguments.callee.done = true;
 				process.nextTick(function() {view.done();});
 			}
@@ -222,6 +224,7 @@ function mergeView(options) {
 
 function renderView() {
 	var view = this;
+	view.ending = true;
 	view.domain.exit();
 	var instance = view.instance;
 	var window = instance.window;
