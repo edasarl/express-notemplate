@@ -34,7 +34,7 @@ var notemplate = module.exports = new EventEmitter();
 var jquery = fs.readFileSync(require.resolve('jquery')).toString();
 
 
-function load(path, href, cb) {
+function load(path, options, cb) {
 	var view = {
 		path: path,
 		asyncs: [],
@@ -49,7 +49,7 @@ function load(path, href, cb) {
 		if (err) return cb(err);
 		fs.readFile(view.path, function(err, str) {
 			if (err) return cb(err, view);
-			view.window = getWindow(str, href);
+			view.window = getWindow(str, options);
 			handleXhrs(view);
 			handleTimeouts(view);
 			view.mtime = result.mtime;
@@ -120,10 +120,11 @@ function handleTimeouts(view) {
 	};
 }
 
-function getWindow(str, href) {
+function getWindow(str, options) {
 	// create window with jquery
+	var href = options.href || "/";
 	var opts = {
-		url: href || "/" // do not resolve to this file path !
+		url: href // do not resolve to this file path !
 	};
 	if (Parser) opts.parser = Parser;
 	var window = jsdom.jsdom(str, "2", opts).createWindow();
@@ -292,7 +293,7 @@ function toString() {
 }
 
 notemplate.__express = function(filename, options, callback) {
-	load(filename, options.href, function(err, view) {
+	load(filename, options, function(err, view) {
 		if (err) return callback(err);
 		// the first time the DOM is ready is an event
 		Step(function() {
