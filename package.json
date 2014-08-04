@@ -13,8 +13,7 @@
     "express": "3.x"
   , "jquery": "2.1.x"
   , "step": "0.0.x"
-  , "jsdom": "0.10.x"
-  , "xmlhttprequest": "https://github.com/kapouer/node-XMLHttpRequest/archive/1.5.1.tar.gz"
+  , "jsdom": "https://github.com/kapouer/jsdom/archive/0f41bfbc.tar.gz"
   },
   "main": "./notemplate.js"
 }

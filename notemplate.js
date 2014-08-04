@@ -20,14 +20,6 @@ jsdom.defaultDocumentFeatures = {
 	QuerySelector: false									// not needed, we use jquery's bundled sizzle instead of jsdom's one.
 };
 
-// force usage of globalAgent before jsdom instantiates XMLHttpRequest
-var xhrModule = require('xmlhttprequest');
-var Xhr = xhrModule.XMLHttpRequest;
-var globalAgent = require('http').globalAgent;
-xhrModule.XMLHttpRequest = function() {
-  return new Xhr({agent: globalAgent});
-};
-
 var notemplate = module.exports = new EventEmitter();
 
 // keep that in memory
@@ -72,13 +64,13 @@ function handleXhrs(view) {
 		xhr.send = function(data) {
 			// while xhr is typically not reused, it can happen, so support it
 			var self = this;
-			function listenXhr(err) {
-				if (this.readyState != 4 && !err) return;
+			function listenXhr(e) {
+				if (this.readyState != this.DONE) return;
 				self.removeEventListener(arguments.callee);
-				if (!err) view.request(self.request[0], self.request[1], self.status, self.responseText);
 				if (view.ending) return;
+				view.request(self.request[0], self.request[1], self.status, self.responseText);
 				arguments.callee.done = true;
-				process.nextTick(function() {view.done();});
+				process.nextTick(function() { view.done(); });
 			}
 			this.addEventListener("readystatechange", listenXhr);
 			view.asyncs.push(listenXhr);
@@ -127,7 +119,8 @@ function getWindow(str, options) {
 		url: href // do not resolve to this file path !
 	};
 	if (Parser) opts.parser = Parser;
-	var window = jsdom.jsdom(str, "2", opts).createWindow();
+	var doc = jsdom.jsdom(str, opts);
+	var window = doc.parentWindow;
 	window.navigator.server = true; // backward-compatibility - jsdom already sets window.navigator.noUI = true
 	window.console = console;
 	var tempfun = window.setTimeout;
