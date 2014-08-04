@@ -1,3 +1,11 @@
+Version 0.2.7
+=============
+
+* depends on jsdom + w3c-xmlhttprequest
+* safer handling of xhr responses after view is closed
+* propagate request Cookie header into document.cookie
+* depends express 4
+
 Version 0.2.6
 =============
 
