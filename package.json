@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "express": "3.x"
+    "express": "^4"
   , "jquery": "2.1.x"
   , "step": "0.0.x"
   , "jsdom": "https://github.com/kapouer/jsdom/archive/0f41bfbc.tar.gz"
