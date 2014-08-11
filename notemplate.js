@@ -114,14 +114,14 @@ function handleTimeouts(view) {
 
 function getWindow(str, options) {
 	// create window with jquery
-	var href = options.href || "/";
+	var href = typeof options.href == "function" && options.href() || "/";
 	var opts = {
 		url: href // do not resolve to this file path !
 	};
 	if (Parser) opts.parser = Parser;
 	var doc = jsdom.jsdom(str, opts);
 	var window = doc.parentWindow;
-	if (options.cookie) doc.cookie = options.cookie;
+	doc.cookie = typeof options.cookie == "function" && options.cookie() || null;
 	window.navigator.server = true; // backward-compatibility - jsdom already sets window.navigator.noUI = true
 	window.console = console;
 	var tempfun = window.setTimeout;
@@ -326,8 +326,12 @@ notemplate.__express = function(filename, options, callback) {
 };
 
 notemplate.middleware = function(req, res, next) {
-	res.locals.href = req.protocol + '://' + req.headers.host + req.url;
-	res.locals.cookie = req.get('Cookie');
+	res.locals.href = function(bound) {return bound;}.bind(null,
+		req.protocol + '://' + req.headers.host + req.url
+	);
+	res.locals.cookie = function(bound) {return bound;}.bind(null,
+		req.get('Cookie')
+	);
 	next();
 };
 
