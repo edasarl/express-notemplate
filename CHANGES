@@ -1,3 +1,9 @@
+Version 0.3.1
+=============
+
+* temporarily depends on patched jsdom + w3c-xmlhttprequest
+* pass cookie and href as locals functions to prevent their serialization.
+
 Version 0.2.7
 =============
 
