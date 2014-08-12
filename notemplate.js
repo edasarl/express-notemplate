@@ -121,7 +121,8 @@ function getWindow(str, options) {
 	if (Parser) opts.parser = Parser;
 	var doc = jsdom.jsdom(str, opts);
 	var window = doc.parentWindow;
-	doc.cookie = typeof options.cookie == "function" && options.cookie() || null;
+	var cookie = typeof options.cookie == "function" && options.cookie();
+	if (cookie) doc.cookie = cookie;
 	window.navigator.server = true; // backward-compatibility - jsdom already sets window.navigator.noUI = true
 	window.console = console;
 	var tempfun = window.setTimeout;
