@@ -114,6 +114,7 @@ function handleTimeouts(view) {
 
 function getWindow(str, options) {
 	// create window with jquery
+	if (!options) options = {};
 	var href = typeof options.href == "function" && options.href() || "/";
 	var opts = {
 		url: href // do not resolve to this file path !
