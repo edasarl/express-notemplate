@@ -2,18 +2,23 @@
   "author": "Jérémy Lal <kapouer@melix.org>",
   "name": "express-notemplate",
   "description": "Express view engine, merges data into DOM using plain JS",
-  "keywords": ["template", "DOM", "asynchronous", "cache"],
   "version": "0.3.4",
+  "keywords": [
+    "template",
+    "DOM",
+    "asynchronous",
+    "cache"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/kapouer/express-notemplate.git"
   },
   "license": "MIT",
   "dependencies": {
-    "express": "^4"
-  , "jquery": "2.1.x"
-  , "step": "0.0.x"
-  , "jsdom": "https://github.com/kapouer/jsdom/archive/60db10ae.tar.gz"
+    "express": "^4.9.5",
+    "jquery": "2.1.x",
+    "jsdom": "https://github.com/kapouer/jsdom/archive/60db10ae.tar.gz",
+    "step": "0.0.x"
   },
   "main": "./notemplate.js"
 }
