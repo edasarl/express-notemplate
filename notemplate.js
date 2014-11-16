@@ -1,4 +1,3 @@
-var domain = require('domain');
 var jsdom = require('jsdom');
 var Path = require('path');
 var URL = require('url');
@@ -222,7 +221,6 @@ function mergeView(options) {
 function renderView() {
 	var view = this;
 	view.ending = true;
-	view.domain.exit();
 	var instance = view.instance;
 	var window = instance.window;
 	// global listeners
@@ -262,10 +260,6 @@ function closeView(err) {
 		delete this.instance;
 	}
 	this.asyncs = null;
-	if (this.domain) {
-		this.domain.dispose();
-		this.domain = null;
-	}
 	if (err && this.callback) {
 		this.callback(err);
 		this.callback = null;
@@ -315,14 +309,10 @@ notemplate.__express = function(filename, options, callback) {
 			if (err) console.error(err); // errors are not fatal
 			notemplate.emit('ready', view, options);
 			view.callback = callback;
-			view.domain = domain.create();
-			view.domain.on('error', function(err) { view.close(err); });
-			view.domain.run(function() {
-				scripts.forEach(function(txt) {
-					if (txt) view.window.run(txt.toString());
-				});
-				view.merge(options);
+			scripts.forEach(function(txt) {
+				if (txt) view.window.run(txt.toString());
 			});
+			view.merge(options);
 		});
 	});
 };
