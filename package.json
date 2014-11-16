@@ -2,13 +2,13 @@
   "author": "Jérémy Lal <kapouer@melix.org>",
   "name": "express-notemplate",
   "description": "Express view engine, merges data into DOM using plain JS",
-  "version": "0.3.4",
   "keywords": [
     "template",
     "DOM",
     "asynchronous",
     "cache"
   ],
+  "version": "0.3.5",
   "repository": {
     "type": "git",
     "url": "git://github.com/kapouer/express-notemplate.git"
